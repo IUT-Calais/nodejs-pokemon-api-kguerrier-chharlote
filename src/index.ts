@@ -18,34 +18,62 @@ export function stopServer() {
 }
 
 // GET de la liste de tous les pokémons
-app.get('/pokemons-cards', (_req: Request, res: Response) => {
-  // const pokemons = await prisma.pokemonCard.findMany();
-  // const pokemons = await prisma.pokemonCard.findMany({ include: { posts: true } });
-  res.status(200).send(`Listes des pokemons`);
-
-
-  // res.status(200).send(pokemons);
+app.get('/pokemons-cards', async (_req: Request, res: Response) => {
+  const pokemons = await prisma.pokemonCard.findMany({ include: { types: true } });
+  res.status(200).send(pokemons);
 })
 
 // GET sur un pokemon en particulier
-app.get('/pokemons-cards/:pokemonCardId', (_req: Request, res: Response) => {
-  res.status(200).send(`Un pokemon`);
+app.get('/pokemons-cards/:pokemonCardId', async (_req: Request, res: Response) => {
+  const { pokemonCardId } = _req.params
+  const pokemon = await prisma.pokemonCard.findUnique({where:{id: Number(pokemonCardId)}});
+  if (pokemon) {
+    res.status(200).send(pokemon);
+  }else {
+    res.status(404).send(`Pokemon ${pokemonCardId} introuvable`);
+  }
 })
 
 // POST, création d'un pokémon
-app.post('/pokemons-cards', (_req: Request, res: Response) => {
-  res.status(201).send(`Pokemon créé`);
-})
+// app.post(`/pokemons-cards`, async (req, res) => {
+//   const { name, pokedexId, types, lifePoints, size, weight, imageUrl } = req.body
+//   const result = await prisma.pokemonCard.create({
+//     data: {
+//       name,
+//       pokedexId,
+//       types: {
+//         connect: {
+//           name: types,
+//         }
+//       },
+//       lifePoints,
+//       size,
+//       weight,
+//       imageUrl,
+//     //  author: { connect: { email: authorEmail } },
+//     },
+//   })
+//   res.status(200).send(`Pokemon modifié`).json(result);
+//
+// })
 
-// PATCH, modifictaion d'un pokémon
+// PATCH, modification d'un pokémon
 app.patch('/pokemons-cards/:pokemonCardId', (_req: Request, res: Response) => {
   res.status(200).send(`Pokemon modifié`);
 })
 
 // DELETE d'un pokémon
-app.delete('/pokemons-cards/:pokemonCardId', (_req: Request, res: Response) => {
-  res.status(200).send(`Pokemon supprimé`);
+app.delete('/pokemons-cards/:pokemonCardId', async (_req: Request, res: Response) => {
+  const { pokemonCardId } = _req.params
+    const pokemon = await prisma.pokemonCard.delete({
+    where: {
+      id: Number(pokemonCardId),
+    },
+  })
+  res.status(200).send(`Pokemon supprimé`).json(pokemon);
 })
+
+
 
 
 
