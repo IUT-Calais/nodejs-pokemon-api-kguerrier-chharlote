@@ -24,27 +24,45 @@ export const getPokemon = async (_req: Request, res: Response) => {
 export const createPokemon = async (_req: Request, res: Response) => {
 
     const { name, pokedexId, types, lifePoints, size, weight, imageUrl } = _req.body
-  const result = await prisma.pokemonCard.create({
-    data: {
-      name,
-      pokedexId,
-      types: {
-        connect: {
-          name: types,
-        }
-      },
-      lifePoints,
-      size,
-      weight,
-      imageUrl,
-    },
-  })
-  res.status(200).send(`Pokemon modifié`).json(result);
-
+      const result = await prisma.pokemonCard.create({
+        data: {
+          name : name,
+          pokedexId : Number(pokedexId),
+          types: {
+            connect: {
+              name: types,
+            }
+          },
+          lifePoints : lifePoints,
+          size : size,
+          weight: weight,
+          imageUrl: imageUrl,
+        },
+      })
+      res.status(200).send(`Pokemon modifié`).json(result);
 }
 
 // Mise à jour d'un pokemon
-export const updatePokemon = async (_req: Request, res: Response) => {}
+export const updatePokemon = async (req: Request, res: Response) => {
+    const { pokemonCardId } = req.params;
+    const dataToUpdate = req.body;
+
+    const parsedId = parseInt(pokemonCardId);
+    if (isNaN(parsedId)) {
+        return res.status(400).send("ID invalide");
+    }
+
+    try {
+        const updatedPokemon = await prisma.pokemonCard.update({
+            where: { id: parsedId },
+            data: dataToUpdate,
+        });
+        return res.status(200).json(updatedPokemon);
+    } catch (error) {
+        return res.status(404).send(`Impossible de mettre à jour : Pokémon ${pokemonCardId} introuvable`);
+    }
+};
+
 
 // Suppression d'un pokemon
 export const deletePokemon = async (_req: Request, res: Response) => {
