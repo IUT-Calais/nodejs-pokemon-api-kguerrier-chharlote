@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import {getPokemon, getPokemons, createPokemon, deletePokemon} from './pokemon.router.controller';
+import {getPokemon, getPokemons, createPokemon, updatePokemon, deletePokemon} from './pokemon.router.controller';
 export const pokemonRouter = Router();
 
 // Route pour obtenir la liste des pokemons
@@ -12,7 +12,7 @@ pokemonRouter.get('/:pokemonCardId', getPokemon);
 pokemonRouter.post('/', createPokemon);
 
 // Route pour mettre à jour un pokemon
-pokemonRouter.patch('/:pokemonCardId', createPokemon);
+pokemonRouter.patch('/:pokemonCardId', updatePokemon);
 
 // Route pour supprimer un pokemon
 pokemonRouter.delete('/:pokemonCardId', deletePokemon);
