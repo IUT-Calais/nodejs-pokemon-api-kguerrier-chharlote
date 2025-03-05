@@ -50,7 +50,7 @@ export const loginUser = async (_req: Request, res: Response)=> {
             res.status(400).send({ message: "Mot de passe incorrect." });
             return;
         }
-        
+
         const token = jwt.sign(
             { id: user.id, email: user.email },
             process.env.JWT_SECRET as jwt.Secret,
