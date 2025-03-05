@@ -6,9 +6,11 @@ export const getPokemons = async (_req: Request, res: Response) => {
     try {
         const pokemons = await prisma.pokemonCard.findMany({ include: { types: true } });
         res.status(200).send(pokemons);
+        return
     } catch (error) {
         console.error("Erreur lors de la récupération des Pokémon:", error);
         res.status(500).send({ message: "Une erreur est survenue lors de la récupération des Pokémon." });
+        return
     }
 };
 
@@ -19,28 +21,33 @@ export const getPokemon = async (_req: Request, res: Response) => {
         const pokemon = await prisma.pokemonCard.findUnique({ where: { id: Number(pokemonCardId) } });
         if (pokemon) {
             res.status(200).send(pokemon);
+            return
         } else {
             res.status(404).send({ message: `Pokemon ${pokemonCardId} introuvable` });
+            return
         }
     } catch (error) {
         console.error("Erreur lors de la récupération du Pokémon:", error);
         res.status(500).send({ message: "Une erreur est survenue lors de la récupération du Pokémon." });
+        return
     }
 };
+
 
 // Création d'un Pokémon
 export const createPokemon = async (_req: Request, res: Response) => {
     try {
-        const { name, pokedexId, types, lifePoints, size, weight, imageUrl } = _req.body;
+        const { name, pokedexId, typeId, lifePoints, size, weight, imageUrl } = _req.body;
+
+        if (!name || !pokedexId || !typeId || !lifePoints || !size || !weight || !imageUrl) {
+            res.status(400).send({ message: "Tous les champs sont requis." });
+            return;
+        }
         const result = await prisma.pokemonCard.create({
             data: {
                 name: name,
                 pokedexId: Number(pokedexId),
-                types: {
-                    connect: {
-                        name: types,
-                    },
-                },
+                typeId: typeId,
                 lifePoints: lifePoints,
                 size: size,
                 weight: weight,
@@ -48,9 +55,11 @@ export const createPokemon = async (_req: Request, res: Response) => {
             },
         });
         res.status(201).json(result);
+        return
     } catch (error) {
         console.error("Erreur lors de la création du Pokémon:", error);
         res.status(500).send({ message: "Une erreur est survenue lors de la création du Pokémon." });
+        return
     }
 };
 
@@ -61,12 +70,14 @@ export const updatePokemon  = async (_req: Request, res: Response) => {
 
         if (isNaN(pokemonCardId)) {
             res.status(400).send({ message: "L'ID du Pokémon est invalide." });
+            return
         }
 
         const { name, typeId, pokedexId, lifePoints, size, weight, imageUrl } = _req.body;
 
-        if (!name || !typeId || !pokedexId || !lifePoints) {
-            res.status(400).json({ message: "Tous les champs sont requis." });
+        if (!name || !pokedexId || !typeId || !lifePoints || !size || !weight || !imageUrl) {
+            res.status(400).send({ message: "Tous les champs sont requis." });
+            return
         }
 
         const updatedPokemonCard = await prisma.pokemonCard.update({
@@ -75,9 +86,11 @@ export const updatePokemon  = async (_req: Request, res: Response) => {
         });
 
         res.status(200).json(updatedPokemonCard);
+        return
     } catch (error) {
         console.error("Erreur lors de la mise à jour de la carte Pokémon:", error);
         res.status(500).send({ message: "Une erreur est survenue lors de la mise à jour de la carte Pokémon." });
+        return
     }
 }
 
@@ -89,6 +102,7 @@ export const deletePokemon  = async (_req: Request, res: Response) => {
 
         if (isNaN(pokemonCardId)) {
             res.status(400).send({ message: "L'ID du Pokémon est invalide." });
+            return
         }
 
         const deletedPokemonCard = await prisma.pokemonCard.delete({
@@ -96,9 +110,11 @@ export const deletePokemon  = async (_req: Request, res: Response) => {
         });
 
         res.status(200).json(deletedPokemonCard);
+        return
     } catch (error) {
         console.error("Erreur lors de la suppression de la carte Pokémon:", error);
         res.status(500).send({ message: "Une erreur est survenue lors de la suppression de la carte Pokémon." });
+        return
     }
 }
 
