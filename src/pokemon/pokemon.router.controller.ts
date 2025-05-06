@@ -18,7 +18,7 @@ export const getPokemons = async (_req: Request, res: Response) => {
 export const getPokemon = async (_req: Request, res: Response) => {
     try {
         const { pokemonCardId } = _req.params;
-        const pokemon = await prisma.pokemonCard.findUnique({ where: { id: Number(pokemonCardId) } });
+        const pokemon = await prisma.pokemonCard.findUnique({ where: { id: Number(pokemonCardId) }, include: { types: true }  });
         if (pokemon) {
             res.status(200).send(pokemon);
             return

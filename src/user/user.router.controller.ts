@@ -20,7 +20,7 @@ import { Request, Response } from "express";
 
         const hashedPassword = await bcrypt.hash(password, 10);
         await prisma.user.create({
-            data: { email, password: hashedPassword },
+            "data": { email, "password": hashedPassword },
         });
 
         res.status(201).send({ message: "Utilisateur créé avec succès." });
