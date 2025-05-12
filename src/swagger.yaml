@@ -1,0 +1,238 @@
+openapi: 3.0.3
+info:
+  title: Pokémon Card API
+  version: 1.0.0
+  description: API de gestion des cartes Pokémon et de ses utilisateurs.
+
+servers:
+  - url: http://localhost:3000
+    description: Serveur local
+
+tags:
+  - name: PokemonCard
+    description: Gestion des Pokémon
+  - name: User
+    description: Authentification et gestion des utilisateurs
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    PokemonCard:
+      type: object
+      required:
+        - name
+        - pokedexId
+        - typeId
+        - lifePoints
+        - size
+        - weight
+        - imageUrl
+      properties:
+        name:
+          type: string
+          example: Pikachu
+        pokedexId:
+          type: integer
+          example: 25
+        typeId:
+          type: integer
+          example: 1
+        lifePoints:
+          type: integer
+          example: 60
+        size:
+          type: number
+          example: 0.4
+        weight:
+          type: number
+          example: 6.0
+        imageUrl:
+          type: string
+          example: "https://example.com/images/pikachu.png"
+
+    UserCredentials:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: user@example.com
+        password:
+          type: string
+          example: password123
+
+    AuthResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Connexion réussie.
+        token:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6...
+
+paths:
+  /pokemons:
+    get:
+      tags:
+        - PokemonCard
+      summary: Obtenir tous les pokémons
+      responses:
+        '200':
+          description: Liste des pokémons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PokemonCard'
+        '500':
+          description: Erreur serveur lors de la récupération des pokemons
+
+    post:
+      tags:
+        - PokemonCard
+      summary: Créer un pokémon
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PokemonCard'
+      responses:
+        '201':
+          description: Pokémon créé
+        '400':
+          description: Champs manquants
+        '401':
+          description: Non autorisé
+        '500':
+          description: Erreur serveur lors de la création du pokemon
+
+  /pokemons/{pokemonCardId}:
+    get:
+      tags:
+        - PokemonCard
+      summary: Obtenir un pokémon par ID
+      parameters:
+        - in: path
+          name: pokemonCardId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Détails du pokémon
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PokemonCard'
+        '404':
+          description: Pokémon non trouvé
+        '500':
+          description: Erreur serveur lors de la récupération du pokemon
+    patch:
+      tags:
+        - PokemonCard
+      summary: Mettre à jour un pokémon
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: pokemonCardId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PokemonCard'
+      responses:
+        '200':
+          description: Pokémon mis à jour
+        '400':
+          description: Requête invalide
+        '404':
+          description: Pokémon non trouvé
+        '500':
+          description: Erreur serveur lors de la mise à jour du pokemon
+
+    delete:
+      tags:
+        - PokemonCard
+      summary: Supprimer un pokémon
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: pokemonCardId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Pokémon supprimé
+        '404':
+          description: Pokémon non trouvé
+        '500':
+          description: Erreur serveur lors de la suppression du pokemon
+
+  /users:
+    post:
+      tags:
+        - User
+      summary: Créer un utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses:
+        '201':
+          description: Utilisateur créé avec succès
+        '400':
+          description: Email ou mot de passe manquant ou déjà utilisé
+        '500':
+          description: Erreur serveur lors de la création de l'utilisateur
+
+  /users/login:
+    post:
+      tags:
+        - User
+      summary: Connexion utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCredentials'
+      responses:
+        '200':
+          description: Connexion réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Email ou mot de passe incorrect
+        '404':
+          description: Utilisateur non trouvé
+        '500':
+          description: Erreur serveur lors de la connexion de l'utilisateur
+
