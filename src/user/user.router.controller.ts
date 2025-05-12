@@ -30,7 +30,7 @@ import { Request, Response } from "express";
     }
 };
 
-
+// Connexion d'un utilisateur
 export const loginUser = async (_req: Request, res: Response)=> {
     try {
         const { email, password } = _req.body;

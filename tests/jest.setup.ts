@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+  import { PrismaClient } from '@prisma/client';
 import { mockDeep, mockReset, DeepMockProxy } from 'jest-mock-extended';
 import prisma from '../src/client';
 import { stopServer } from '../src';
@@ -30,6 +30,19 @@ jest.mock('bcrypt', () => ({
     return false;
   }),
 }));
+jest.mock('bcrypt', () => ({
+  __esModule: true,
+  default: {
+    hash: jest.fn(() => Promise.resolve('hashedPassword')),
+    compare: jest.fn((password: string, hashed: string) => {
+      if (password === 'truePassword') {
+        return true;
+      }
+      return false;
+    }),
+  },
+}));
+
 
 beforeEach(() => {
   mockReset(prismaMock);
