@@ -4,37 +4,37 @@ import { prismaMock } from './jest.setup';
 
 describe('PokemonCard API', () => {
   describe('GET /pokemon-cards', () => {
-    it('should fetch all PokemonCards', async () => {
-      const mockPokemonCards = [
-        {
+    const mockPokemonCards = [
+      {
+        id: 1,
+        name: "Bulbizarre",
+        pokedexId: 1,
+        typeId: 1,
+        lifePoints: 40,
+        size: 0.7,
+        weight: 6.9,
+        imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
+        types: {
           id: 1,
-          name: "Bulbizarre",
-          pokedexId: 1,
-          typeId: 1,
-          lifePoints: 40,
-          size: 0.7,
-          weight: 6.9,
-          imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
-          types: {
-            id: 1,
-            name: "Grass"
-          }
-        },
-        {
-          id: 2,
-          name: "Carapuce",
-          pokedexId: 7,
-          typeId: 3,
-          lifePoints: 44,
-          size: 0.7,
-          weight: 9,
-          imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
-          types: {
-            id: 3,
-            name: "Water"
-          }
+          name: "Grass"
         }
-      ];
+      },
+      {
+        id: 2,
+        name: "Carapuce",
+        pokedexId: 7,
+        typeId: 3,
+        lifePoints: 44,
+        size: 0.7,
+        weight: 9,
+        imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
+        types: {
+          id: 3,
+          name: "Water"
+        }
+      }
+    ];
+    it('should fetch all PokemonCards', async () => {
 
       prismaMock.pokemonCard.findMany.mockResolvedValue(mockPokemonCards);
 
@@ -43,6 +43,16 @@ describe('PokemonCard API', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockPokemonCards);
     });
+
+    it('should return 500 if an error during get all', async () => {
+      prismaMock.pokemonCard.findMany.mockRejectedValue(new Error('Erreur'));
+
+      const response = await request(app).get('/pokemons-cards');
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ message: "Une erreur est survenue lors de la récupération des Pokémon." });
+    });
+
   });
 
   describe('GET /pokemon-cards/:pokemonCardId', () => {
@@ -71,30 +81,40 @@ describe('PokemonCard API', () => {
       expect(response.status).toBe(404);
       expect(response.body).toEqual({ message:  `Pokemon 666 introuvable` });
     });
+
+    it('should return 500 if an error during get', async () => {
+      prismaMock.pokemonCard.findUnique.mockRejectedValue(new Error('Erreur'));
+
+      const response = await request(app).get('/pokemons-cards/3');
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ message: "Une erreur est survenue lors de la récupération du Pokémon." });
+    });
+
   });
 
   describe('POST /pokemons-cards', () => {
-    it('should create a new PokemonCard', async () => {
-      const newPokemon = {
-        name: "Salamèche",
-        pokedexId: 4,
-        typeId: 2,
-        lifePoints: 39,
-        size: 0.6,
-        weight: 8.5,
-        imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
-      };
-      const createdPokemon = {
-        id: 3,
-        name: "Salamèche",
-        pokedexId: 4,
-        typeId: 2,
-        lifePoints: 39,
-        size: 0.6,
-        weight: 8.5,
-        imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
-      };
+    const newPokemon = {
+      name: "Salamèche",
+      pokedexId: 4,
+      typeId: 2,
+      lifePoints: 39,
+      size: 0.6,
+      weight: 8.5,
+      imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
+    };
+    const createdPokemon = {
+      id: 3,
+      name: "Salamèche",
+      pokedexId: 4,
+      typeId: 2,
+      lifePoints: 39,
+      size: 0.6,
+      weight: 8.5,
+      imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
+    };
 
+    it('should create a new PokemonCard', async () => {
 
       prismaMock.pokemonCard.create.mockResolvedValue(createdPokemon);
 
@@ -114,21 +134,34 @@ describe('PokemonCard API', () => {
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ message: "Tous les champs sont requis." });
     });
+
+    it('should return 500 if an error during create', async () => {
+      prismaMock.pokemonCard.create.mockRejectedValue(new Error('Erreur'));
+
+      const response = await request(app)
+          .post('/pokemons-cards')
+          .set('Authorization', 'Bearer mockedToken')
+          .send(newPokemon);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ message: "Une erreur est survenue lors de la création du Pokémon." });
+    });
+
   });
 
   describe('PATCH /pokemons-cards/:pokemonCardId', () => {
+    const updatedData = {
+      name: "Salamèche évolué",
+      pokedexId: 5,
+      typeId: 2,
+      lifePoints: 50,
+      size: 0.7,
+      weight: 9.0,
+      imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/005.png",
+    };
+
     it('should update an existing PokemonCard', async () => {
       const pokemonCardId = 3;
-
-      const updatedData = {
-        name: "Salamèche évolué",
-        pokedexId: 5,
-        typeId: 2,
-        lifePoints: 50,
-        size: 0.7,
-        weight: 9.0,
-        imageUrl: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/005.png",
-      };
 
       const updatedPokemon = { id: pokemonCardId, ...updatedData };
 
@@ -169,6 +202,19 @@ describe('PokemonCard API', () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toEqual({ message: "L'ID du Pokémon est invalide." });
+    });
+
+    it('should return 500 if an error during update', async () => {
+      prismaMock.pokemonCard.update.mockRejectedValue(new Error('Erreur'));
+
+      const response = await request(app)
+          .patch(`/pokemons-cards/3`)
+          .set('Authorization', 'Bearer mockedToken')
+
+          .send(updatedData);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({ message: "Une erreur est survenue lors de la mise à jour de la carte Pokémon." });
     });
   });
 

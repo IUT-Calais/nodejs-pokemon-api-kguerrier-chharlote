@@ -59,8 +59,7 @@ export const loginUser = async (_req: Request, res: Response)=> {
 
         res.status(200).json({ message: "Connexion réussie.", token });
     } catch (error) {
-        console.error("Erreur lors de la connexion:", error);
-        res.status(500).send(error);
+        res.status(500).send({message: "Erreur serveur."});
     }
 };
 
@@ -92,7 +91,7 @@ export const getUser = async (_req: Request, res: Response) => {
         }
     } catch (error) {
         console.error("Erreur lors de la récupération de l'utiliateur:", error);
-        res.status(500).send({ message: "Une erreur est survenue lors de la récupération des utilisateurs." });
+        res.status(500).send({ message: "Une erreur est survenue lors de la récupération de l'utilisateur." });
         return
     }
 };

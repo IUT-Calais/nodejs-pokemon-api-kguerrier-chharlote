@@ -48,6 +48,18 @@ describe('User API', () => {
             expect(response.status).toBe(400);
             expect(response.body).toEqual({ message: 'Email déjà utilisé.' });
         });
+
+        it('should return 500 if an error during creation', async () => {
+            prismaMock.user.findUnique.mockRejectedValue(new Error('Erreur'));
+
+            const response = await request(app).post('/users').send({
+                email: 'admin@example.com',
+                password: 'password'
+            });
+
+            expect(response.status).toBe(500);
+            expect(response.body).toEqual({ message: 'Erreur serveur.' });
+        });
     });
 
 
@@ -106,6 +118,18 @@ describe('User API', () => {
             expect(response.status).toBe(400);
             expect(response.body).toEqual({ message: 'Mot de passe incorrect.' });
         });
+
+        it('should return 500 if an error during login', async () => {
+            prismaMock.user.findUnique.mockRejectedValue(new Error('Erreur'));
+
+            const response = await request(app).post('/users/login').send({
+                email: 'admin@example.com',
+                password: 'password'
+            });
+
+            expect(response.status).toBe(500);
+            expect(response.body).toEqual({message: "Erreur serveur."});});
+
     });
 
     describe('GET /users', () => {
@@ -130,6 +154,16 @@ describe('User API', () => {
             expect(response.status).toBe(200);
             expect(response.body).toEqual(mockUsers);
         });
+
+        it('should return 500 if an error during get all', async () => {
+            prismaMock.user.findMany.mockRejectedValue(new Error('Erreur'));
+
+            const response = await request(app).get('/users');
+
+            expect(response.status).toBe(500);
+            expect(response.body).toEqual({ message: "Une erreur est survenue lors de la récupération des utilisateurs." });
+        });
+
     });
 
     describe('GET /users/:userId', () => {
@@ -153,6 +187,16 @@ describe('User API', () => {
             expect(response.status).toBe(404);
             expect(response.body).toEqual({ message:  `Utilisateur 666 introuvable` });
         });
+
+        it('should return 500 if an error during get', async () => {
+            prismaMock.user.findUnique.mockRejectedValue(new Error('Erreur'));
+
+            const response = await request(app).get('/users/4');
+
+            expect(response.status).toBe(500);
+            expect(response.body).toEqual({ message: "Une erreur est survenue lors de la récupération de l'utilisateur." });
+        });
+
     });
 
     describe('PATCH /users/:userId', () => {
@@ -191,6 +235,17 @@ describe('User API', () => {
 
             expect(response.status).toBe(400);
             expect(response.body).toEqual({ message: "L'ID de l'utilisateur est invalide." });
+        });
+
+        it('should return 500 if an error during update', async () => {
+            prismaMock.user.update.mockRejectedValue(new Error('Erreur'));
+
+            const response = await request(app)
+                .patch(`/users/3`)
+                .send(updatedData);
+
+            expect(response.status).toBe(500);
+            expect(response.body).toEqual({ message: "Une erreur est survenue lors de la mise à jour de l'utilisateur." });
         });
 
     });
