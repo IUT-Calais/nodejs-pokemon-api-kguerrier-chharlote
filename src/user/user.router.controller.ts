@@ -64,3 +64,92 @@ export const loginUser = async (_req: Request, res: Response)=> {
     }
 };
 
+
+// Récupération des utilisateurs
+export const getUsers = async (_req: Request, res: Response) => {
+    try {
+        const users = await prisma.user.findMany({});
+        res.status(200).send(users);
+        return
+    } catch (error) {
+        console.error("Erreur lors de la récupération des utilisateurs:", error);
+        res.status(500).send({ message: "Une erreur est survenue lors de la récupération des utilisateurs." });
+        return
+    }
+};
+
+// Récupération d'un utilisateur avec son id
+export const getUser = async (_req: Request, res: Response) => {
+    try {
+        const { userId } = _req.params;
+        const user = await prisma.user.findUnique({ where: { id: Number(userId) } });
+        if (user) {
+            res.status(200).send(user);
+            return
+        } else {
+            res.status(404).send({ message: `Utilisateur ${userId} introuvable` });
+            return
+        }
+    } catch (error) {
+        console.error("Erreur lors de la récupération de l'utiliateur:", error);
+        res.status(500).send({ message: "Une erreur est survenue lors de la récupération des utilisateurs." });
+        return
+    }
+};
+
+// Mise à jour d'un utilisateur
+export const updateUser  = async (_req: Request, res: Response) => {
+    try {
+        const userId = parseInt(_req.params.userId);
+
+        if (isNaN(userId)) {
+            res.status(400).send({ message: "L'ID de l'utilisateur est invalide." });
+            return
+        }
+
+        const { email, password} = _req.body;
+
+        if (!email || !password) {
+            res.status(400).send({ message: "Tous les champs sont requis." });
+            return
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: { email, "password": hashedPassword},
+        });
+
+        res.status(200).json(updatedUser);
+        return
+    } catch (error) {
+        console.error("Erreur lors de la mise à jour de l'utilisateur':", error);
+        res.status(500).send({ message: "Une erreur est survenue lors de la mise à jour de l'utilisateur." });
+        return
+    }
+}
+
+// Suppression d'un utilisateur
+export const deleteUser  = async (_req: Request, res: Response) => {
+    try {
+        const userId = parseInt(_req.params.userId);
+
+        if (isNaN(userId)) {
+            res.status(400).send({ message: "L'ID de l'utilisateur est invalide." });
+            return
+        }
+
+        await prisma.user.delete({
+            where: { id: userId }
+        });
+        //
+        // res.status(200).json(deletedUser);
+        res.status(200).send({ message: `Utilisateur ${userId} supprimé` });
+        return
+    } catch (error) {
+        console.error("Erreur lors de la suppression de l'utilisateur:", error);
+        res.status(500).send({ message: "Une erreur est survenue lors de la suppression de l'utilisateur." });
+        return
+    }
+}
+

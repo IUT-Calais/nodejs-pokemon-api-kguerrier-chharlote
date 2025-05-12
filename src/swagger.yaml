@@ -55,7 +55,7 @@ components:
           type: string
           example: "https://example.com/images/pikachu.png"
 
-    UserCredentials:
+    User:
       type: object
       required:
         - email
@@ -202,7 +202,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCredentials'
+              $ref: '#/components/schemas/User'
       responses:
         '201':
           description: Utilisateur créé avec succès
@@ -210,6 +210,22 @@ paths:
           description: Email ou mot de passe manquant ou déjà utilisé
         '500':
           description: Erreur serveur lors de la création de l'utilisateur
+    get:
+      tags:
+        - User
+      summary:  Obtenir tous les utilisateurs
+      responses:
+        '200':
+          description: Liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Erreur serveur lors de la récupération de l'utilisateur
+
 
   /users/login:
     post:
@@ -221,7 +237,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserCredentials'
+              $ref: '#/components/schemas/User'
       responses:
         '200':
           description: Connexion réussie
@@ -235,4 +251,74 @@ paths:
           description: Utilisateur non trouvé
         '500':
           description: Erreur serveur lors de la connexion de l'utilisateur
+
+  /users/{userId}:
+    get:
+      tags:
+        - User
+      summary: Obtenir un utilisateur par ID
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Détails d'un utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Utilisateur non trouvé
+        '500':
+          description: Erreur serveur lors de la récupération de l'utilisateur
+    patch:
+      tags:
+        - User
+      summary: Mettre à jour un utilisateur
+      parameters:
+        - in: path
+          name: UserID
+          required: true
+          schema:
+            type: integer
+            example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Utilisateur mis à jour
+        '400':
+          description: Requête invalide
+        '404':
+          description: Utilisateur non trouvé
+        '500':
+          description: Erreur serveur lors de la mise à jour du l'utilisateur
+
+    delete:
+      tags:
+        - User
+      summary: Supprimer un utilisateur
+      parameters:
+        - in: path
+          name: UserId
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        '200':
+          description: Utilisateur supprimé
+        '404':
+          description: Utilisateur non trouvé
+        '500':
+          description: Erreur serveur lors de la suppression de l'utilisateur
+
 

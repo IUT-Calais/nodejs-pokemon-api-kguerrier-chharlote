@@ -63,7 +63,7 @@ export const createPokemon = async (_req: Request, res: Response) => {
     }
 };
 
-// Mise à jour d'un pokemon
+// Mise à jour d'un utilisateur
 export const updatePokemon  = async (_req: Request, res: Response) => {
     try {
         const pokemonCardId = parseInt(_req.params.pokemonCardId);
